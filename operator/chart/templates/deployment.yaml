@@ -33,6 +33,24 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: INVENTA_OPERATOR_AUTH_TENANT_ID
+              value: {{ .Values.inventa.authTenantId }}
+            - name: INVENTA_OPERATOR_AUTH_CLIENT_ID
+              value: {{ .Values.inventa.authClientId }}
+            - name: INVENTA_OPERATOR_LISTEN_ADDRESS
+              value: {{ .Values.inventa.bindAddress }}
+            - name: INVENTA_OPERATOR_ENABLE_SERVICEPROXY_CONTROLLER
+              value: "{{ .Values.inventa.enableServiceProxyCrd }}"
+            - name: INVENTA_OPERATOR_ENABLE_INGRESSPROXY_ANNOTATION_CONTROLLER
+              value: "{{ .Values.inventa.enableIngressMonitoring }}"
+            - name: INVENTA_OPERATOR_ENABLE_SERVICEPROXY_ANNOTATION_CONTROLLER
+              value: "{{ .Values.inventa.enableServiceMonitoring }}"
+            - name: INVENTA_OPERATOR_ENABLE_HTTP_API
+              value: "{{ .Values.inventa.enableHttpApi }}"
+            - name: INVENTA_OPERATOR_API_ENABLE_AUTH
+              value: "{{ .Values.inventa.enableHttpApiAuth }}"
+            {{- toYaml .Values.podEnv | nindent 12 }}
           ports:
             - name: api
               containerPort: 8090

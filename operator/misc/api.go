@@ -32,7 +32,6 @@ func InitApi(store *InMemoryStore, enableAuth bool) {
 		provider = newProvider
 	}
 
-
 	authMiddleware := authenticationMiddleware{
 		ClientID: AUTH_CLIENT_ID,
 		Provider: provider,
