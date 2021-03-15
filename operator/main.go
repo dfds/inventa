@@ -20,7 +20,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/dfds/inventa/operator/misc"
 
@@ -43,12 +42,12 @@ import (
 var (
 	scheme             = runtime.NewScheme()
 	setupLog           = ctrl.Log.WithName("setup")
-	enableServiceProxy = getEnvBool("INVENTA_OPERATOR_ENABLE_SERVICEPROXY_CONTROLLER", true)
-	enableHttpApi      = getEnvBool("INVENTA_OPERATOR_ENABLE_HTTP_API", true)
-	enableApiAuth      = getEnvBool("INVENTA_OPERATOR_API_ENABLE_AUTH", false)
+	enableServiceProxy = misc.GetEnvBool("INVENTA_OPERATOR_ENABLE_SERVICEPROXY_CONTROLLER", true)
+	enableHttpApi      = misc.GetEnvBool("INVENTA_OPERATOR_ENABLE_HTTP_API", true)
+	enableApiAuth      = misc.GetEnvBool("INVENTA_OPERATOR_API_ENABLE_AUTH", false)
 
-	enableIngressProxyAnnotationController = getEnvBool("INVENTA_OPERATOR_ENABLE_INGRESSPROXY_ANNOTATION_CONTROLLER", true)
-	enableServiceProxyAnnotationController = getEnvBool("INVENTA_OPERATOR_ENABLE_SERVICEPROXY_ANNOTATION_CONTROLLER", true)
+	enableIngressProxyAnnotationController = misc.GetEnvBool("INVENTA_OPERATOR_ENABLE_INGRESSPROXY_ANNOTATION_CONTROLLER", true)
+	enableServiceProxyAnnotationController = misc.GetEnvBool("INVENTA_OPERATOR_ENABLE_SERVICEPROXY_ANNOTATION_CONTROLLER", true)
 )
 
 func init() {
@@ -154,31 +153,4 @@ func main() {
 		setupLog.Error(err, "problem running manager")
 		os.Exit(1)
 	}
-}
-
-func getEnvValue(key string, def string) string {
-	val := os.Getenv(key)
-	if len(val) == 0 {
-		return def
-	}
-
-	return val
-}
-
-func getEnvBool(key string, def bool) bool {
-	val := os.Getenv(key)
-
-	if len(val) == 0 {
-		return def
-	}
-
-	if strings.Compare("false", strings.ToLower(val)) == 0 {
-		return false
-	}
-
-	if strings.Compare("true", strings.ToLower(val)) == 0 {
-		return true
-	}
-
-	return def
 }
