@@ -1,0 +1,20 @@
+# permissions for end users to view serviceproxies.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: serviceproxy-viewer-role
+rules:
+- apiGroups:
+  - stable.dfds.cloud
+  resources:
+  - serviceproxies
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - stable.dfds.cloud
+  resources:
+  - serviceproxies/status
+  verbs:
+  - get

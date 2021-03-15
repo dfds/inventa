@@ -1,0 +1,34 @@
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: manager-role
+rules:
+- apiGroups:
+  - stable.dfds.cloud
+  resources:
+  - serviceproxies
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - stable.dfds.cloud
+  resources:
+  - serviceproxies/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - stable.dfds.cloud
+  resources:
+  - serviceproxies/status
+  verbs:
+  - get
+  - patch
+  - update

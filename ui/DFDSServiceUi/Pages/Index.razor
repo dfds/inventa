@@ -1,0 +1,206 @@
+﻿@page "/"
+@using System.Net.Http
+@using Microsoft.Extensions.Configuration
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@using System.Security.Claims
+
+@inject HttpClient Http
+@inject IConfiguration Configuration
+@inject IHttpClientFactory ClientFactory
+
+
+<AuthorizeView>
+    <Authorized>
+        <h1>DFDS ProxyService Catalog</h1>
+
+        <p>Each Capability's ingresses and services are shown below.</p>
+        @if (capabilityResults == null)
+        {
+            @if (fetchingData)
+            {
+                <div class="spinner-border" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+            }
+
+            @if (errorMessage != "")
+            {
+                <div class="alert alert-danger" role="alert">
+                    @errorMessage
+                </div>
+            }
+        }
+        else
+        {
+
+            @foreach (var capability in capabilityResults)
+            {
+                @if (blacklist.Any(capability.capabilityName.Contains) == false)
+                {
+                    <div class="accordion" id="accordionCapability">
+                        <div class="card">
+                            <div class="card-header" id="heading@(capability.capabilityName)">
+                                <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapse@(capability.capabilityName)" aria-expanded="true" aria-controls="collapse@(capability.capabilityName)">@capability.capabilityName Capability</button>
+                            </div>
+                            <div id="collapse@(capability.capabilityName)" class="collapse" aria-labelledby="heading@(capability.capabilityName)" data-parent="#accordionCapability">
+                                <div class="card-body">
+                                    <h4>Ingresses</h4>
+                                    @foreach (var ingress in capability.ingresses)
+                                    {
+                                        @foreach (var rules in ingress.Spec.Rules)
+                                        {
+                                            @if (rules.Http != null)
+                                            {
+                                                @foreach (var paths in rules.Http.Paths)
+                                                {
+                                                    <a href="https://@(rules.Host + paths.Path)">@ingress.Metadata.Name</a> <a href="https://@(rules.Host + paths.Path)/swagger"><img height="10" width="10" src="swagger.png" /></a> <a href="">[Install Proxy]</a>
+                                                    <br />
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    <h4>Services</h4>
+                                    @foreach (var service in capability.services)
+                                    {
+                                        @service.Metadata.Name
+                                        <br />
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        }
+    </Authorized>
+    <NotAuthorized>
+        Not Authorised
+    </NotAuthorized>
+</AuthorizeView>
+
+
+
+
+@code {
+    private ServiceProxyResult[] results;
+    private List<CapabilityResult> capabilityResults;
+
+    private bool fetchingData = false;
+    private string errorMessage = "";
+
+    private string _authMessage;
+    private string _surnameMessage;
+    private IEnumerable<Claim> _claims = Enumerable.Empty<Claim>();
+
+    private List<string> blacklist = new List<string>();
+
+    private async Task GetClaimsPrincipalData()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        Console.WriteLine(user.Identity.Name);
+
+        if (user.Identity.IsAuthenticated)
+        {
+            _authMessage = $"{user.Identity.Name} is authenticated.";
+            _claims = user.Claims;
+            _surnameMessage =
+                $"Surname: {user.FindFirst(c => c.Type == ClaimTypes.Surname)?.Value}";
+        }
+        else
+        {
+            _authMessage = "The user is NOT authenticated.";
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        GetClaimsPrincipalData();
+        var bl = Configuration.GetSection("Blacklist").GetChildren().Select(x => x.Value).ToArray();
+        foreach (var b in bl)
+        {
+            blacklist.Add(b);
+        }
+
+        try
+        {
+            var client = ClientFactory.CreateClient("DFDSServiceApi");
+            fetchingData = true;
+            results = await client.GetFromJsonAsync<ServiceProxyResult[]>("api/ServiceProxy");
+        }
+        catch (AccessTokenNotAvailableException exception)
+        {
+            exception.Redirect();
+            errorMessage = "Access token not available";
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            errorMessage = "There was an error retrieving data";
+        }
+        finally
+        {
+            fetchingData = false;
+        }
+
+        if (results != null)
+        {
+            GetCapabilities();
+        }
+
+    }
+
+    void GetCapabilities()
+    {
+        capabilityResults = new List<CapabilityResult>();
+        foreach (var result in results)
+        {
+            foreach (var ingress in result.ingresses)
+            {
+                if (namespaceExists(ingress.Metadata.NamespaceProperty))
+                {
+                    capabilityResults.Single(s => s.capabilityName.Equals(ingress.Metadata.NamespaceProperty)).ingresses.Add(ingress);
+                }
+                else
+                {
+                    var thing = new CapabilityResult { capabilityName = ingress.Metadata.NamespaceProperty };
+                    thing.ingresses.Add(ingress);
+                    capabilityResults.Add(thing);
+                }
+
+            }
+
+            foreach (var service in result.services)
+            {
+                if (namespaceExists(service.Metadata.NamespaceProperty))
+                {
+                    Console.WriteLine(service.Metadata.NamespaceProperty);
+                    capabilityResults.Single(s => s.capabilityName.Equals(service.Metadata.NamespaceProperty)).services.Add(service);
+                }
+                else
+                {
+                    var thing = new CapabilityResult { capabilityName = service.Metadata.NamespaceProperty };
+                    thing.services.Add(service);
+                    capabilityResults.Add(thing);
+                }
+
+            }
+        }
+    }
+
+    private bool namespaceExists(string capability)
+    {
+        foreach (var result in capabilityResults)
+        {
+            if (result.capabilityName == capability)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+}
