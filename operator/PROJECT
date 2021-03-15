@@ -1,7 +1,7 @@
 domain: dfds.cloud
 layout: go.kubebuilder.io/v3
 projectName: operator-go
-repo: github.com/dfds/crossplane-sandbox/dfds-serviceproxy/operator-go
+repo: github.com/dfds/inventa/operator
 resources:
 - crdVersion: v1
   group: stable

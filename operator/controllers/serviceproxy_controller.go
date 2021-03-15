@@ -31,7 +31,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	stablev1alpha1 "github.com/dfds/crossplane-sandbox/dfds-serviceproxy/operator-go/api/v1alpha1"
+	stablev1alpha1 "github.com/dfds/inventa/operator/api/v1alpha1"
 )
 
 // ServiceProxyReconciler reconciles a ServiceProxy object

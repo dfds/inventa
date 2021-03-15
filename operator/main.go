@@ -22,7 +22,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/dfds/crossplane-sandbox/dfds-serviceproxy/operator-go/misc"
+	"github.com/dfds/inventa/operator/misc"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
@@ -35,16 +35,17 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	stablev1alpha1 "github.com/dfds/crossplane-sandbox/dfds-serviceproxy/operator-go/api/v1alpha1"
-	"github.com/dfds/crossplane-sandbox/dfds-serviceproxy/operator-go/controllers"
+	stablev1alpha1 "github.com/dfds/inventa/operator/api/v1alpha1"
+	"github.com/dfds/inventa/operator/controllers"
 	// +kubebuilder:scaffold:imports
 )
 
 var (
-	scheme   = runtime.NewScheme()
-	setupLog = ctrl.Log.WithName("setup")
+	scheme             = runtime.NewScheme()
+	setupLog           = ctrl.Log.WithName("setup")
 	enableServiceProxy = getEnvBool("SERVICEPROXY_ENABLE_SERVICEPROXY_CONTROLLER", true)
-	enableHttpApi = getEnvBool("SERVICEPROXY_ENABLE_HTTP_API", true)
+	enableHttpApi      = getEnvBool("SERVICEPROXY_ENABLE_HTTP_API", true)
+	enableApiAuth      = getEnvBool("API_ENABLE_AUTH", false)
 
 	enableIngressProxyAnnotationController = getEnvBool("SERVICEPROXY_ENABLE_INGRESSPROXY_ANNOTATION_CONTROLLER", true)
 	enableServiceProxyAnnotationController = getEnvBool("SERVICEPROXY_ENABLE_SERVICEPROXY_ANNOTATION_CONTROLLER", true)
@@ -96,7 +97,6 @@ func main() {
 
 		go misc.InitApi(store)
 	}
-
 
 	if enableServiceProxyAnnotationController {
 		fmt.Println("ServiceProxyAnnotationController enabled")
@@ -155,7 +155,6 @@ func main() {
 		os.Exit(1)
 	}
 }
-
 
 func getEnvValue(key string, def string) string {
 	val := os.Getenv(key)

@@ -30,7 +30,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	stablev1alpha1 "github.com/dfds/crossplane-sandbox/dfds-serviceproxy/operator-go/api/v1alpha1"
+	stablev1alpha1 "github.com/dfds/inventa/operator/api/v1alpha1"
 	// +kubebuilder:scaffold:imports
 )
 
