@@ -17,9 +17,9 @@ import (
 	"k8s.io/apimachinery/pkg/util/json"
 )
 
-var LISTEN_ADDRESS = os.Getenv("SERVICEPROXY_OPERATOR_LISTEN_ADDRESS")
+var LISTEN_ADDRESS = os.Getenv("INVENTA_OPERATOR_LISTEN_ADDRESS")
 
-func InitApi(store *InMemoryStore) {
+func InitApi(store *InMemoryStore, enableAuth bool) {
 	provider, err := oidc.NewProvider(context.Background(), "https://login.microsoftonline.com/{TENANT_ID}/v2.0")
 	if err != nil {
 		log.Fatal(err)
@@ -43,7 +43,11 @@ func InitApi(store *InMemoryStore) {
 		Router: r,
 		Store:  store,
 	}
-	r.Handle("/api/get-all", authMiddleware.Middleware(http.HandlerFunc(app.GetAll)))
+	if enableAuth {
+		r.Handle("/api/get-all", authMiddleware.Middleware(http.HandlerFunc(app.GetAll)))
+	} else {
+		r.Handle("/api/get-all", http.HandlerFunc(app.GetAll))
+	}
 
 	fmt.Printf("HTTP server listening on %s\n", addr)
 	if err := http.ListenAndServe(addr, handlers.LoggingHandler(os.Stdout, r)); err != nil {

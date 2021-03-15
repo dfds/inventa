@@ -43,12 +43,12 @@ import (
 var (
 	scheme             = runtime.NewScheme()
 	setupLog           = ctrl.Log.WithName("setup")
-	enableServiceProxy = getEnvBool("SERVICEPROXY_ENABLE_SERVICEPROXY_CONTROLLER", true)
-	enableHttpApi      = getEnvBool("SERVICEPROXY_ENABLE_HTTP_API", true)
-	enableApiAuth      = getEnvBool("API_ENABLE_AUTH", false)
+	enableServiceProxy = getEnvBool("INVENTA_OPERATOR_ENABLE_SERVICEPROXY_CONTROLLER", true)
+	enableHttpApi      = getEnvBool("INVENTA_OPERATOR_ENABLE_HTTP_API", true)
+	enableApiAuth      = getEnvBool("INVENTA_OPERATOR_API_ENABLE_AUTH", false)
 
-	enableIngressProxyAnnotationController = getEnvBool("SERVICEPROXY_ENABLE_INGRESSPROXY_ANNOTATION_CONTROLLER", true)
-	enableServiceProxyAnnotationController = getEnvBool("SERVICEPROXY_ENABLE_SERVICEPROXY_ANNOTATION_CONTROLLER", true)
+	enableIngressProxyAnnotationController = getEnvBool("INVENTA_OPERATOR_ENABLE_INGRESSPROXY_ANNOTATION_CONTROLLER", true)
+	enableServiceProxyAnnotationController = getEnvBool("INVENTA_OPERATOR_ENABLE_SERVICEPROXY_ANNOTATION_CONTROLLER", true)
 )
 
 func init() {
@@ -95,7 +95,7 @@ func main() {
 		// Start separate Goroutine that runs the API server
 		fmt.Println("HTTP api enabled")
 
-		go misc.InitApi(store)
+		go misc.InitApi(store, enableApiAuth)
 	}
 
 	if enableServiceProxyAnnotationController {
