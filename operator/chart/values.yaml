@@ -15,6 +15,21 @@ nameOverride: ""
 fullnameOverride: ""
 priorityClassName: ""
 
+inventa:
+  authClientId: ""
+  authTenantId: ""
+  bindAddress: "127.0.0.1"
+  # Enables monitoring of ServiceProxyCrd
+  enableServiceProxyCrd: false
+  # Enable Ingress annotation controller
+  enableIngressMonitoring: true
+  # Enable Service annotation controller
+  enableServiceMonitoring: true  
+  # Enable HTTP API
+  enableHttpApi: true
+  # Enables auth on all HTTP endpoints(not including metrics)
+  enableHttpApiAuth: false
+
 serviceAccount:
   # Specifies whether a service account should be created
   create: true

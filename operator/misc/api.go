@@ -23,10 +23,15 @@ var AUTH_CLIENT_ID = GetEnvValue("INVENTA_OPERATOR_AUTH_CLIENT_ID", "-1")
 
 
 func InitApi(store *InMemoryStore, enableAuth bool) {
-	provider, err := oidc.NewProvider(context.Background(), fmt.Sprintf("https://login.microsoftonline.com/%s/v2.0", AUTH_TENANT_ID))
-	if err != nil {
-		log.Fatal(err)
+	var provider *oidc.Provider
+	if enableAuth {
+		newProvider, err := oidc.NewProvider(context.Background(), fmt.Sprintf("https://login.microsoftonline.com/%s/v2.0", AUTH_TENANT_ID))
+		if err != nil {
+			log.Fatal(err)
+		}
+		provider = newProvider
 	}
+
 
 	authMiddleware := authenticationMiddleware{
 		ClientID: AUTH_CLIENT_ID,
