@@ -1,0 +1,25 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ .Release.Name}}-serviceproxy-serviceproxies-admin-access
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ .Release.Name}}-serviceproxy-admin
+subjects:
+- kind: ServiceAccount
+  name: {{ include "inventa-operator.serviceAccountName" . }}
+  namespace: {{ .Release.Namespace}}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ .Release.Name}}-serviceproxy-read-watch-access
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ .Release.Name}}-serviceproxy-read-and-watch
+subjects:
+- kind: ServiceAccount
+  name: {{ include "inventa-operator.serviceAccountName" . }}
+  namespace: {{ .Release.Namespace}}
