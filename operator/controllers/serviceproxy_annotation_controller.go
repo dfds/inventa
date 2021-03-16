@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/dfds/crossplane-sandbox/dfds-serviceproxy/operator-go/misc"
+	"github.com/dfds/inventa/operator/misc"
 	"github.com/go-logr/logr"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"

@@ -17,33 +17,38 @@ import (
 	"k8s.io/apimachinery/pkg/util/json"
 )
 
-var LISTEN_ADDRESS = os.Getenv("SERVICEPROXY_OPERATOR_LISTEN_ADDRESS")
+var LISTEN_ADDRESS = GetEnvValue("INVENTA_OPERATOR_LISTEN_ADDRESS", "127.0.0.1")
+var AUTH_TENANT_ID = GetEnvValue("INVENTA_OPERATOR_AUTH_TENANT_ID", "-1")
+var AUTH_CLIENT_ID = GetEnvValue("INVENTA_OPERATOR_AUTH_CLIENT_ID", "-1")
 
-func InitApi(store *InMemoryStore) {
-	provider, err := oidc.NewProvider(context.Background(), "https://login.microsoftonline.com/{TENANT_ID}/v2.0")
-	if err != nil {
-		log.Fatal(err)
+
+func InitApi(store *InMemoryStore, enableAuth bool) {
+	var provider *oidc.Provider
+	if enableAuth {
+		newProvider, err := oidc.NewProvider(context.Background(), fmt.Sprintf("https://login.microsoftonline.com/%s/v2.0", AUTH_TENANT_ID))
+		if err != nil {
+			log.Fatal(err)
+		}
+		provider = newProvider
 	}
 
 	authMiddleware := authenticationMiddleware{
-		ClientID: "{CLIENT_ID}",
+		ClientID: AUTH_CLIENT_ID,
 		Provider: provider,
 	}
 
-	var addr string
-	if len(LISTEN_ADDRESS) > 0 {
-		addr = LISTEN_ADDRESS
-	} else {
-		addr = "127.0.0.1"
-	}
-	addr = fmt.Sprintf("%s:8090", LISTEN_ADDRESS)
+	addr := fmt.Sprintf("%s:8090", LISTEN_ADDRESS)
 
 	r := mux.NewRouter()
 	app := App{
 		Router: r,
 		Store:  store,
 	}
-	r.Handle("/api/get-all", authMiddleware.Middleware(http.HandlerFunc(app.GetAll)))
+	if enableAuth {
+		r.Handle("/api/get-all", authMiddleware.Middleware(http.HandlerFunc(app.GetAll)))
+	} else {
+		r.Handle("/api/get-all", http.HandlerFunc(app.GetAll))
+	}
 
 	fmt.Printf("HTTP server listening on %s\n", addr)
 	if err := http.ListenAndServe(addr, handlers.LoggingHandler(os.Stdout, r)); err != nil {

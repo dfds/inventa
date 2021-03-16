@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "inventa-operator.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "inventa-operator.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "inventa-operator.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "inventa-operator.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "inventa-operator.serviceAccountName" . }}
+      priorityClassName: {{ .Values.priorityClassName }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: INVENTA_OPERATOR_AUTH_TENANT_ID
+              value: {{ .Values.inventa.authTenantId }}
+            - name: INVENTA_OPERATOR_AUTH_CLIENT_ID
+              value: {{ .Values.inventa.authClientId }}
+            - name: INVENTA_OPERATOR_LISTEN_ADDRESS
+              value: {{ .Values.inventa.bindAddress }}
+            - name: INVENTA_OPERATOR_ENABLE_SERVICEPROXY_CONTROLLER
+              value: "{{ .Values.inventa.enableServiceProxyCrd }}"
+            - name: INVENTA_OPERATOR_ENABLE_INGRESSPROXY_ANNOTATION_CONTROLLER
+              value: "{{ .Values.inventa.enableIngressMonitoring }}"
+            - name: INVENTA_OPERATOR_ENABLE_SERVICEPROXY_ANNOTATION_CONTROLLER
+              value: "{{ .Values.inventa.enableServiceMonitoring }}"
+            - name: INVENTA_OPERATOR_ENABLE_HTTP_API
+              value: "{{ .Values.inventa.enableHttpApi }}"
+            - name: INVENTA_OPERATOR_API_ENABLE_AUTH
+              value: "{{ .Values.inventa.enableHttpApiAuth }}"
+            {{- toYaml .Values.podEnv | nindent 12 }}
+          ports:
+            - name: api
+              containerPort: 8090
+              protocol: TCP
+            - containerPort: 8080
+              name: metrics
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

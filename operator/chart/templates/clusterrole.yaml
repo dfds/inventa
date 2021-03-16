@@ -1,0 +1,42 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Release.Name}}-serviceproxy-admin
+rules:
+- apiGroups:
+  - "stable.dfds.cloud"
+  resources:
+  - serviceproxies
+  verbs:
+  - '*'
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Release.Name}}-serviceproxy-read-and-watch
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - 'list'
+  - 'get'
+  - 'watch'
+- apiGroups:
+  - "networking.k8s.io"
+  resources:
+  - ingresses
+  verbs:
+  - 'list'
+  - 'get' 
+  - 'watch'
+- apiGroups:
+  - "apps"
+  resources:
+  - deployments
+  verbs:
+  - 'list'
+  - 'get' 
+  - 'watch'

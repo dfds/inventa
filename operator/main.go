@@ -20,9 +20,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"strings"
 
-	"github.com/dfds/crossplane-sandbox/dfds-serviceproxy/operator-go/misc"
+	"github.com/dfds/inventa/operator/misc"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
@@ -35,19 +34,20 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	stablev1alpha1 "github.com/dfds/crossplane-sandbox/dfds-serviceproxy/operator-go/api/v1alpha1"
-	"github.com/dfds/crossplane-sandbox/dfds-serviceproxy/operator-go/controllers"
+	stablev1alpha1 "github.com/dfds/inventa/operator/api/v1alpha1"
+	"github.com/dfds/inventa/operator/controllers"
 	// +kubebuilder:scaffold:imports
 )
 
 var (
-	scheme   = runtime.NewScheme()
-	setupLog = ctrl.Log.WithName("setup")
-	enableServiceProxy = getEnvBool("SERVICEPROXY_ENABLE_SERVICEPROXY_CONTROLLER", true)
-	enableHttpApi = getEnvBool("SERVICEPROXY_ENABLE_HTTP_API", true)
+	scheme             = runtime.NewScheme()
+	setupLog           = ctrl.Log.WithName("setup")
+	enableServiceProxy = misc.GetEnvBool("INVENTA_OPERATOR_ENABLE_SERVICEPROXY_CONTROLLER", true)
+	enableHttpApi      = misc.GetEnvBool("INVENTA_OPERATOR_ENABLE_HTTP_API", true)
+	enableApiAuth      = misc.GetEnvBool("INVENTA_OPERATOR_API_ENABLE_AUTH", false)
 
-	enableIngressProxyAnnotationController = getEnvBool("SERVICEPROXY_ENABLE_INGRESSPROXY_ANNOTATION_CONTROLLER", true)
-	enableServiceProxyAnnotationController = getEnvBool("SERVICEPROXY_ENABLE_SERVICEPROXY_ANNOTATION_CONTROLLER", true)
+	enableIngressProxyAnnotationController = misc.GetEnvBool("INVENTA_OPERATOR_ENABLE_INGRESSPROXY_ANNOTATION_CONTROLLER", true)
+	enableServiceProxyAnnotationController = misc.GetEnvBool("INVENTA_OPERATOR_ENABLE_SERVICEPROXY_ANNOTATION_CONTROLLER", true)
 )
 
 func init() {
@@ -94,9 +94,8 @@ func main() {
 		// Start separate Goroutine that runs the API server
 		fmt.Println("HTTP api enabled")
 
-		go misc.InitApi(store)
+		go misc.InitApi(store, enableApiAuth)
 	}
-
 
 	if enableServiceProxyAnnotationController {
 		fmt.Println("ServiceProxyAnnotationController enabled")
@@ -154,32 +153,4 @@ func main() {
 		setupLog.Error(err, "problem running manager")
 		os.Exit(1)
 	}
-}
-
-
-func getEnvValue(key string, def string) string {
-	val := os.Getenv(key)
-	if len(val) == 0 {
-		return def
-	}
-
-	return val
-}
-
-func getEnvBool(key string, def bool) bool {
-	val := os.Getenv(key)
-
-	if len(val) == 0 {
-		return def
-	}
-
-	if strings.Compare("false", strings.ToLower(val)) == 0 {
-		return false
-	}
-
-	if strings.Compare("true", strings.ToLower(val)) == 0 {
-		return true
-	}
-
-	return def
 }
