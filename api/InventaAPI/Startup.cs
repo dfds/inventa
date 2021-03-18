@@ -81,7 +81,9 @@ namespace DFDSServiceAPI
                 options.DefaultChallengeScheme = "AzureADBearer";
             }).AddAzureADBearer(options =>
             {
-              Configuration.Bind("AzureAd", options);  
+                options.ClientId = Configuration.GetSection("INVENTA_API_AUTH_CLIENT_ID").Value;
+                options.TenantId = Configuration.GetSection("INVENTA_API_AUTH_TENANT_ID").Value;
+                Configuration.Bind("AzureAd", options);
             });
 
             services.Configure<JwtBearerOptions>(AzureADDefaults.JwtBearerAuthenticationScheme, options =>
