@@ -12,6 +12,7 @@ namespace DFDSServiceAPI.Controllers
 {
     [Produces("application/json")]
     [Route("api/[controller]")]
+    [Authorize(AuthenticationSchemes = "AzureADBearer")]
     [ApiController]
     public class ServiceProxyController : Controller
     {
