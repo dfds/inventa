@@ -18,24 +18,31 @@ namespace Service
         private readonly HttpClient _client = new HttpClient();
         private readonly IConfidentialClientApplication _confidentialClient;
         private readonly string _scopes;
+        private readonly bool _useAuth;
 
-        public ServiceProxy(string proxyUrl, string scopes, IConfidentialClientApplication confidentialClient)
+        public ServiceProxy(string proxyUrl, string scopes, bool useAuth, IConfidentialClientApplication confidentialClient)
         {
             _client.BaseAddress = new Uri(proxyUrl);
             _confidentialClient = confidentialClient;
             _scopes = scopes;
+            _useAuth = useAuth;
         }
 
         public async Task<ServiceProxyResult> GetResults()
         {
             ServiceProxyResult result = new ServiceProxyResult(_client.BaseAddress.ToString());
+            AuthenticationResult tokenResult = null;
 
-            var tokenResult = await _confidentialClient.AcquireTokenForClient(new List<string>(new []{_scopes})).ExecuteAsync();
+
+            tokenResult = await _confidentialClient.AcquireTokenForClient(new List<string>(new[] { _scopes })).ExecuteAsync();
+
 
             using (_client)
             {     
                 _client.BaseAddress = new Uri(_client.BaseAddress.ToString());
+
                 _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", tokenResult.AccessToken);
+
 
                 try
                 {

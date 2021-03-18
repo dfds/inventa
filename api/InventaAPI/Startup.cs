@@ -65,10 +65,10 @@ namespace DFDSServiceAPI
                 }
                 });
 
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "DFDSServiceAPI", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "InventaAPI", Version = "v1" });
             });
 
-            services.AddServiceProxyServiceCollection(Configuration.GetSection("ServiceProxy"));
+            services.AddServiceProxyServiceCollection(Configuration);
             
             ConfigureAuth(services);
         }
@@ -98,9 +98,10 @@ namespace DFDSServiceAPI
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "DFDSServiceAPI v1"));
             }
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Inventa API v1"));
 
             app.UseCors("GlobalPolicy");
 
