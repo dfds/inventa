@@ -103,7 +103,11 @@ namespace DFDSServiceAPI
             }
 
             app.UseSwagger();
-            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Inventa API v1"));
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Inventa API v1");
+                c.ConfigObject.AdditionalItems.Add("syntaxHighlight", false);
+            });
 
             app.UseCors("GlobalPolicy");
 
