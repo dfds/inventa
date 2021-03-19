@@ -22,10 +22,10 @@ namespace Service
 
             foreach (var p in _options.Value.proxyUrl)
             {
-                var sp = new ServiceProxy(p, _options.Value.clientScopes, ConfidentialClientApplicationBuilder
+                var sp = new ServiceProxy(p, _options.Value.clientScopes, _options.Value.authEnabled, ConfidentialClientApplicationBuilder
                     .Create(_options.Value.clientId)
                     .WithClientSecret(_options.Value.clientSecret)
-                    .WithTenantId("")
+                    .WithTenantId(_options.Value.tenantId)
                     .Build());
                 results.Add(await sp.GetResults());
             }
