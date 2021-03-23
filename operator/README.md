@@ -54,9 +54,12 @@ The `rbac.installOnlyRbac` option exists in case you deploy/update Helm installa
 
 ## Usage
 
-```sh
-todo
-```
+With the operator running with the default settings, the following will be running:
+
+- Monitoring of Ingress and Service objects cluster-wide
+- HTTP API
+
+Documentation for the API can be found in [openapi.yaml](operator/openapi.yaml).
 
 ## Author
 
