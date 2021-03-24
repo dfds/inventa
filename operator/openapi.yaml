@@ -37,7 +37,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/GetAll'          
       security:
-      - azuread_auth:
+      - Bearer:
         - .default
 components:
   schemas:
@@ -49,9 +49,8 @@ components:
         service:
           type: object
   securitySchemes:
-    azuread_auth:
-      type: openIdConnect
-      name: authorization
+    Bearer:
+      type: apiKey
+      description: Please insert JWT with Bearer into field
+      name: Authorization
       in: header
-      scheme: Bearer
-      openIdConnectUrl: https://login.microsoftonline.com/TENANT-ID-HERE/v2.0/.well-known/openid-configuration

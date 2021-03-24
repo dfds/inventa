@@ -1,4 +1,4 @@
-<h1 align="center">Welcome to inventa-operator 👋</h1>
+<h1 align="center">inventa-operator</h1>
 <p>
   <a href="api-docs.md" target="_blank">
     <img alt="Documentation" src="https://img.shields.io/badge/documentation-yes-brightgreen.svg" />
@@ -20,7 +20,7 @@ helm repo update
 helm install inven dfds/inventa-operator
 ```
 
-Running the commands above will install inventa-operator with the default settings. If you wish you customise beyond stock, you can find all the support configuration values in the [values.yaml](https://github.com/dfds/helm-charts/blob/main/charts/inventa-operator/values.yaml). The core options are the following:
+Running the commands above will install inventa-operator with the default settings. If you wish to customise beyond stock, you can find all the support configuration values in the [values.yaml](https://github.com/dfds/helm-charts/blob/main/charts/inventa-operator/values.yaml). The core options are the following:
 
 ```yaml
 inventa:
