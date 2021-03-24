@@ -22,6 +22,25 @@ helm install inven-api dfds/inventa-api
 
 Running the commands above will install inventa-api with the default settings. If you wish to customise beyond stock, you can find all the support configuration values in the [values.yaml](https://github.com/dfds/helm-charts/blob/main/charts/inventa-api/values.yaml).
 
+*inventa-api* needs to be configured with one or more operator. To do that the "INVENTA_API_OPERATOR_URLS" environment variable needs to be set.
+
+**values.yaml**
+
+```yaml
+inventa:
+  operatorUrls: "http://localhost:8090,http://cluster-dev.somewhere.in.the.cloud"
+```
+
+```sh
+helm install inven-api dfds/inventa-api -f values.yaml
+```
+
+or
+
+```sh
+helm install inven-api dfds/inventa-api --set inventa.operatorUrls="http://localhost:8090,http://cluster-dev.somewhere.in.the.cloud"
+```
+
 ## Usage
 
 With the operator running with the default settings, the following will be running:
