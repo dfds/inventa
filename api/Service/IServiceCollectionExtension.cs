@@ -17,10 +17,10 @@ namespace Service
                 {
                     options.authEnabled = bool.Parse(conf.GetSection("INVENTA_API_AUTH_ENABLE").Value);
                     options.proxyUrl = conf.GetSection("INVENTA_API_OPERATOR_URLS").Value.Split(',');
-                    options.clientId = conf.GetSection("INVENTA_API_AUTH_CLIENT_ID").Value;
+                    options.clientId = conf.GetSection("AzureAd:ClientId").Value;
                     options.clientSecret = conf.GetSection("INVENTA_API_AUTH_CLIENT_SECRET").Value;
                     options.clientScopes = conf.GetSection("INVENTA_API_AUTH_CLIENT_SCOPES").Value;
-                    options.tenantId = conf.GetSection("INVENTA_API_AUTH_TENANT_ID").Value;
+                    options.tenantId = conf.GetSection("AzureAd:TenantId").Value;
                 });
 
             services.AddTransient<IServiceProxyService, ServiceProxyService>();

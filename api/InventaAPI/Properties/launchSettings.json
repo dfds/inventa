@@ -14,7 +14,13 @@
       "launchBrowser": true,
       "launchUrl": "swagger",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "INVENTA_API_AUTH_ENABLE": "true",
+        "INVENTA_API_AUTH_CLIENT_SECRET": "set_value",
+        "INVENTA_API_AUTH_CLIENT_SCOPES": "set_value",
+        "INVENTA_API_OPERATOR_URLS": "set_values",
+        "INVENTA_API_AzureAd__ClientId": "set_value",
+        "INVENTA_API_AzureAd__TenantId": "set_value"
       }
     },
     "DFDSServiceAPI": {
@@ -24,7 +30,13 @@
       "launchUrl": "swagger",
       "applicationUrl": "http://localhost:5000",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "INVENTA_API_AUTH_ENABLE": "true",
+        "INVENTA_API_AUTH_CLIENT_SECRET": "set_value",
+        "INVENTA_API_AUTH_CLIENT_SCOPES": "set_value",
+        "INVENTA_API_OPERATOR_URLS": "set_values",
+        "INVENTA_API_AzureAd__ClientId": "set_value",
+        "INVENTA_API_AzureAd__TenantId": "set_value"
       }
     }
   }
