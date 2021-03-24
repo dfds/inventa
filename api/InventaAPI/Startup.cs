@@ -1,24 +1,11 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Service;
-using AutoMapper;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.AzureAD.UI;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Identity.Web;
-using Microsoft.Identity.Web.Resource;
-using AadIssuerValidator = DFDSServiceAPI.Authentication.AadIssuerValidator;
 
 namespace DFDSServiceAPI
 {
@@ -75,23 +62,7 @@ namespace DFDSServiceAPI
 
         protected virtual void ConfigureAuth(IServiceCollection services)
         {
-            services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = "AzureADBearer";
-                options.DefaultChallengeScheme = "AzureADBearer";
-            }).AddAzureADBearer(options =>
-            {
-                options.ClientId = Configuration.GetSection("INVENTA_API_AUTH_CLIENT_ID").Value;
-                options.TenantId = Configuration.GetSection("INVENTA_API_AUTH_TENANT_ID").Value;
-                Configuration.Bind("AzureAd", options);
-            });
-
-            services.Configure<JwtBearerOptions>(AzureADDefaults.JwtBearerAuthenticationScheme, options =>
-            {
-                options.Authority += "/v2.0";
-                options.TokenValidationParameters.ValidAudiences = new string[] { options.Audience, $"api://{options.Audience}" };
-                options.TokenValidationParameters.IssuerValidator = AadIssuerValidator.ValidateAadIssuer;
-            });
+            services.AddMicrosoftIdentityWebApiAuthentication(Configuration, "AzureAD");
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
