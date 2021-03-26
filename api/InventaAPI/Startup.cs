@@ -6,6 +6,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Service;
 using Microsoft.Identity.Web;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Authorization;
 
 namespace DFDSServiceAPI
 {
@@ -30,39 +33,62 @@ namespace DFDSServiceAPI
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
-                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                if (bool.Parse(Configuration.GetSection("INVENTA_API_AUTH_ENABLE").Value))
                 {
-                    In = ParameterLocation.Header,
-                    Description = "Please insert JWT with Bearer into field",
-                    Name = "Authorization",
-                    Type = SecuritySchemeType.ApiKey
-                });
+                    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                    {
+                        In = ParameterLocation.Header,
+                        Description = "Please insert JWT with Bearer into field",
+                        Name = "Authorization",
+                        Type = SecuritySchemeType.ApiKey
+                    });
 
-                c.AddSecurityRequirement(new OpenApiSecurityRequirement {
-                {
-                    new OpenApiSecurityScheme
+                    c.AddSecurityRequirement(new OpenApiSecurityRequirement {
                     {
-                    Reference = new OpenApiReference
-                    {
-                        Type = ReferenceType.SecurityScheme,
-                        Id = "Bearer"
+                        new OpenApiSecurityScheme
+                        {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                        },
+                        new string[] { }
                     }
-                    },
-                    new string[] { }
+                    });
                 }
-                });
 
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "InventaAPI", Version = "v1" });
             });
 
             services.AddServiceProxyServiceCollection(Configuration);
             
-            ConfigureAuth(services);
+            if (bool.Parse(Configuration.GetSection("INVENTA_API_AUTH_ENABLE").Value))
+            {
+                ConfigureAuth(services);
+            }
+            else
+            {
+                services.AddMvcCore(opts =>
+                {
+                    opts.EnableEndpointRouting = false;
+                    opts.Filters.Add(new AllowAnonymousFilter());
+                });
+            }
         }
 
         protected virtual void ConfigureAuth(IServiceCollection services)
         {
+            services.AddMvcCore(options => options.EnableEndpointRouting = false)
+                    .AddAuthorization();
             services.AddMicrosoftIdentityWebApiAuthentication(Configuration, "AzureAD");
+
+            var scopeRequirementPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+
+            services.Configure<MvcOptions>(options =>
+                    options.Filters.Add(new AuthorizeFilter(scopeRequirementPolicy))
+                );
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -84,12 +110,17 @@ namespace DFDSServiceAPI
 
             app.UseRouting();
 
-            app.UseAuthorization();
+            if (bool.Parse(Configuration.GetSection("INVENTA_API_AUTH_ENABLE").Value))
+            {
+                app.UseAuthentication();
+            }
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
+
+            app.UseMvc();
         }
     }
 }
