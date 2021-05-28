@@ -1,6 +1,7 @@
 package misc
 
 import (
+	"context"
 	"crypto/tls"
 	"fmt"
 	"github.com/segmentio/kafka-go"
@@ -13,7 +14,8 @@ import (
 )
 
 type Publisher struct {
-	writer *kafka.Writer
+	Writer *kafka.Writer
+	Topic string
 }
 
 type KafkaConfig struct {
@@ -22,13 +24,15 @@ type KafkaConfig struct {
 	Password string
 	SASLMechanism string
 	TLSEnabled bool
+	Topic string
 }
 
 func NewPublisher() *Publisher {
 	pub := &Publisher{}
 	conf := NewKafkaConfig()
 
-	pub.writer = &kafka.Writer{
+	pub.Topic = conf.Topic
+	pub.Writer = &kafka.Writer{
 		Addr:		kafka.TCP(conf.BrokerEndpoint),
 		Async:		false,
 		Transport:	MakeKafkaTransport(conf),
@@ -44,8 +48,10 @@ func NewKafkaConfig() KafkaConfig {
 	conf := KafkaConfig{
 		Username: GetEnvValue(fmt.Sprintf("%s_PUBLISHER_KAFKA_USERNAME", CONF_PREFIX), ""),
 		Password: GetEnvValue(fmt.Sprintf("%s_PUBLISHER_KAFKA_PASSWORD", CONF_PREFIX), ""),
+		BrokerEndpoint: GetEnvValue(fmt.Sprintf("%s_PUBLISHER_KAFKA_ENDPOINT", CONF_PREFIX), ""),
+		Topic: GetEnvValue(fmt.Sprintf("%s_PUBLISHER_KAFKA_TOPIC", CONF_PREFIX), ""),
 		SASLMechanism: GetEnvValue(fmt.Sprintf("%s_PUBLISHER_KAFKA_SASLMECHANISM", CONF_PREFIX), ""),
-		TLSEnabled: GetEnvBool(fmt.Sprintf("%s_PUBLISHER_KAFKA_SASLMECHANISM", CONF_PREFIX), false),
+		TLSEnabled: GetEnvBool(fmt.Sprintf("%s_PUBLISHER_KAFKA_TLSENABLED", CONF_PREFIX), false),
 	}
 
 	return conf
@@ -93,4 +99,40 @@ func MakeKafkaTransport(conf KafkaConfig) *kafka.Transport {
 	}
 
 	return transport
+}
+
+type PublisherService struct {
+	publisher *Publisher
+	messageChannel <-chan string
+}
+
+func NewPublisherService(messageChannel <-chan string) *PublisherService {
+	ps := &PublisherService{
+		publisher: NewPublisher(),
+		messageChannel: messageChannel,
+	}
+
+	return ps
+}
+
+func (p *PublisherService) Run() {
+	for {
+		msg := <-p.messageChannel
+
+		err := p.publisher.Writer.WriteMessages(context.Background(),
+			kafka.Message{
+				Topic: p.publisher.Topic,
+				Value: []byte(fmt.Sprintf(msg)),
+			})
+		if err != nil {
+			log.Println(err)
+		}
+
+		fmt.Println(msg)
+	}
+}
+
+func RunPublisherService(messageChannel <-chan string) {
+	ps := NewPublisherService(messageChannel)
+	ps.Run()
 }

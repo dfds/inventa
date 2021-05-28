@@ -20,6 +20,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/dfds/inventa/operator/misc"
 
@@ -45,6 +46,7 @@ var (
 	enableServiceProxy = misc.GetEnvBool("INVENTA_OPERATOR_ENABLE_SERVICEPROXY_CONTROLLER", true)
 	enableHttpApi      = misc.GetEnvBool("INVENTA_OPERATOR_ENABLE_HTTP_API", true)
 	enableApiAuth      = misc.GetEnvBool("INVENTA_OPERATOR_API_ENABLE_AUTH", false)
+	enablePublisher    = misc.GetEnvBool(fmt.Sprintf("%s_ENABLE_PUBLISHER", misc.CONF_PREFIX), false)
 
 	enableIngressProxyAnnotationController = misc.GetEnvBool("INVENTA_OPERATOR_ENABLE_INGRESSPROXY_ANNOTATION_CONTROLLER", true)
 	enableServiceProxyAnnotationController = misc.GetEnvBool("INVENTA_OPERATOR_ENABLE_SERVICEPROXY_ANNOTATION_CONTROLLER", true)
@@ -89,6 +91,19 @@ func main() {
 	}
 
 	store := misc.NewInMemoryStore()
+
+	if enablePublisher {
+		messageChannel := make(chan string, 99)
+
+		go func() {
+			for {
+				messageChannel <- fmt.Sprintf("Weee %v", time.Now().Format("2006-01-02 15:04:05"))
+				time.Sleep(8 * time.Second)
+			}
+		}()
+
+		go misc.RunPublisherService(messageChannel)
+	}
 
 	if enableHttpApi {
 		// Start separate Goroutine that runs the API server
