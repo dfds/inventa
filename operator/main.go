@@ -19,9 +19,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"os"
-
 	"github.com/dfds/inventa/operator/misc"
+	"os"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
@@ -45,6 +44,7 @@ var (
 	enableServiceProxy = misc.GetEnvBool("INVENTA_OPERATOR_ENABLE_SERVICEPROXY_CONTROLLER", true)
 	enableHttpApi      = misc.GetEnvBool("INVENTA_OPERATOR_ENABLE_HTTP_API", true)
 	enableApiAuth      = misc.GetEnvBool("INVENTA_OPERATOR_API_ENABLE_AUTH", false)
+	enablePublisher    = misc.GetEnvBool(fmt.Sprintf("%s_ENABLE_PUBLISHER", misc.CONF_PREFIX), false)
 
 	enableIngressProxyAnnotationController = misc.GetEnvBool("INVENTA_OPERATOR_ENABLE_INGRESSPROXY_ANNOTATION_CONTROLLER", true)
 	enableServiceProxyAnnotationController = misc.GetEnvBool("INVENTA_OPERATOR_ENABLE_SERVICEPROXY_ANNOTATION_CONTROLLER", true)
@@ -89,6 +89,21 @@ func main() {
 	}
 
 	store := misc.NewInMemoryStore()
+
+	if enablePublisher {
+		messageChannel := make(chan interface{}, 99)
+		go misc.RunPublisherService(messageChannel)
+
+		if err = (&controllers.PublishEventsReconciler{
+			Client: mgr.GetClient(),
+			Log:    ctrl.Log.WithName("controllers").WithName("PublishEventsReconciler"),
+			Scheme: mgr.GetScheme(),
+			Store:  store,
+		}).SetupWithManager(mgr, messageChannel); err != nil {
+			setupLog.Error(err, "unable to create controller", "controller", "PublishEventsReconciler")
+			os.Exit(1)
+		}
+	}
 
 	if enableHttpApi {
 		// Start separate Goroutine that runs the API server

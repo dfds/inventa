@@ -5,6 +5,10 @@ import (
 	"strings"
 )
 
+const (
+	CONF_PREFIX = "INVENTA_OPERATOR"
+)
+
 func GetEnvValue(key string, def string) string {
 	val := os.Getenv(key)
 	if len(val) == 0 {

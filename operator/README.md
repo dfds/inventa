@@ -34,12 +34,22 @@ inventa:
   enableHttpApi: true
   # Enables auth on all HTTP endpoints(not including metrics). Currently only supports Azure AD. authClientId and authTenantId must be configured if this is enabled.
   enableHttpApiAuth: false
+  # Enables Kafka event forwarding of the Event resource
+  enablePublisher: false
   # Specify IPv4 address to bind the API server to.
   bindAddress: "127.0.0.1"  
   # Azure AD client id. Not necessary if enableHttpApiAuth is set to false
   authClientId: ""
   # Azure AD tenant id. Not necessary if enableHttpApiAuth is set to false 
   authTenantId: ""
+  # Contains configuration for Kafka event forwarding
+  publisher:
+    username: ""
+    password: ""
+    endpoint: ""
+    topic: ""
+    saslMechanism: ""
+    tlsEnabled: false
 
 rbac:
   # Will add RBAC manifests(clusterrole, clusterrolebinding, serviceaccount) as a part of the Chart installation
