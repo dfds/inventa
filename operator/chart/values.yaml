@@ -31,6 +31,7 @@ inventa:
   enableHttpApiAuth: false
   # Enables Kafka event forwarding of the Event resource
   enablePublisher: false
+  # Contains configuration for Kafka event forwarding
   publisher:
     username: ""
     password: ""
