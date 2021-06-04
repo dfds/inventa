@@ -7,8 +7,12 @@ import (
 	"github.com/segmentio/kafka-go"
 	"github.com/segmentio/kafka-go/sasl"
 	"github.com/segmentio/kafka-go/sasl/plain"
+	"k8s.io/apimachinery/pkg/util/json"
+	"k8s.io/client-go/kubernetes"
 	"log"
 	"net"
+	"sigs.k8s.io/controller-runtime/pkg/client/config"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -27,6 +31,15 @@ type KafkaConfig struct {
 	Topic string
 }
 
+type MessageEnclosure struct {
+	App string
+	Timestamp string
+	ClusterName string
+	ClusterVersion string
+	Payload interface{}
+
+}
+
 func NewPublisher() *Publisher {
 	pub := &Publisher{}
 	conf := NewKafkaConfig()
@@ -37,7 +50,7 @@ func NewPublisher() *Publisher {
 		Async:		false,
 		Transport:	MakeKafkaTransport(conf),
 		Completion: func(messages []kafka.Message, err error) {
-			log.Printf("%v\n", messages)
+
 		},
 	}
 
@@ -103,10 +116,10 @@ func MakeKafkaTransport(conf KafkaConfig) *kafka.Transport {
 
 type PublisherService struct {
 	publisher *Publisher
-	messageChannel <-chan string
+	messageChannel <-chan interface{}
 }
 
-func NewPublisherService(messageChannel <-chan string) *PublisherService {
+func NewPublisherService(messageChannel <-chan interface{}) *PublisherService {
 	ps := &PublisherService{
 		publisher: NewPublisher(),
 		messageChannel: messageChannel,
@@ -116,23 +129,50 @@ func NewPublisherService(messageChannel <-chan string) *PublisherService {
 }
 
 func (p *PublisherService) Run() {
+	conf, err := config.GetConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	clientSet, err := kubernetes.NewForConfig(conf)
+	if err != nil {
+		log.Fatal(err)
+	}
+	serverVer, err := clientSet.ServerVersion()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	for {
 		msg := <-p.messageChannel
 
-		err := p.publisher.Writer.WriteMessages(context.Background(),
-			kafka.Message{
-				Topic: p.publisher.Topic,
-				Value: []byte(fmt.Sprintf(msg)),
-			})
-		if err != nil {
-			log.Println(err)
-		}
+		go func() {
+			enclosure := MessageEnclosure{
+				App:            "inventa-operator",
+				Timestamp:      strconv.FormatInt(time.Now().Unix(), 10),
+				ClusterName:    "hellman",
+				ClusterVersion: serverVer.String(),
+				Payload:        msg,
+			}
 
-		fmt.Println(msg)
+			serialised, err := json.Marshal(&enclosure)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			err = p.publisher.Writer.WriteMessages(context.Background(),
+				kafka.Message{
+					Topic: p.publisher.Topic,
+					Value: serialised,
+				})
+			if err != nil {
+				log.Fatal(err)
+			}
+		}()
 	}
 }
 
-func RunPublisherService(messageChannel <-chan string) {
+func RunPublisherService(messageChannel <-chan interface{}) {
 	ps := NewPublisherService(messageChannel)
 	ps.Run()
 }

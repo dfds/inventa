@@ -19,10 +19,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"os"
-	"time"
-
 	"github.com/dfds/inventa/operator/misc"
+	"os"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
@@ -93,16 +91,18 @@ func main() {
 	store := misc.NewInMemoryStore()
 
 	if enablePublisher {
-		messageChannel := make(chan string, 99)
-
-		go func() {
-			for {
-				messageChannel <- fmt.Sprintf("Weee %v", time.Now().Format("2006-01-02 15:04:05"))
-				time.Sleep(8 * time.Second)
-			}
-		}()
-
+		messageChannel := make(chan interface{}, 99)
 		go misc.RunPublisherService(messageChannel)
+
+		if err = (&controllers.PublishEventsReconciler{
+			Client: mgr.GetClient(),
+			Log:    ctrl.Log.WithName("controllers").WithName("PublishEventsReconciler"),
+			Scheme: mgr.GetScheme(),
+			Store:  store,
+		}).SetupWithManager(mgr, messageChannel); err != nil {
+			setupLog.Error(err, "unable to create controller", "controller", "PublishEventsReconciler")
+			os.Exit(1)
+		}
 	}
 
 	if enableHttpApi {
