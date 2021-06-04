@@ -50,6 +50,20 @@ spec:
               value: "{{ .Values.inventa.enableHttpApi }}"
             - name: INVENTA_OPERATOR_API_ENABLE_AUTH
               value: "{{ .Values.inventa.enableHttpApiAuth }}"
+            - name: INVENTA_OPERATOR_ENABLE_PUBLISHER
+              value: "{{ .Values.inventa.enablePublisher }}"
+            - name: INVENTA_OPERATOR_PUBLISHER_KAFKA_USERNAME
+              value: "{{ .Values.inventa.publisher.kafka.username }}"
+            - name: INVENTA_OPERATOR_PUBLISHER_KAFKA_PASSWORD
+              value: "{{ .Values.inventa.publisher.kafka.password }}"
+            - name: INVENTA_OPERATOR_PUBLISHER_KAFKA_ENDPOINT
+              value: "{{ .Values.inventa.publisher.kafka.endpoint }}"
+            - name: INVENTA_OPERATOR_PUBLISHER_KAFKA_TOPIC
+              value: "{{ .Values.inventa.publisher.kafka.topic }}"
+            - name: INVENTA_OPERATOR_PUBLISHER_KAFKA_SASLMECHANISM
+              value: "{{ .Values.inventa.publisher.kafka.saslMechanism }}"
+            - name: INVENTA_OPERATOR_PUBLISHER_KAFKA_TLSENABLED
+              value: "{{ .Values.inventa.publisher.kafka.tlsEnabled }}"
             {{- toYaml .Values.podEnv | nindent 12 }}
           ports:
             - name: api

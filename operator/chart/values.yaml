@@ -29,6 +29,15 @@ inventa:
   enableHttpApi: true
   # Enables auth on all HTTP endpoints(not including metrics)
   enableHttpApiAuth: false
+  # Enables Kafka event forwarding of the Event resource
+  enablePublisher: false
+  publisher:
+    username: ""
+    password: ""
+    endpoint: ""
+    topic: ""
+    saslMechanism: ""
+    tlsEnabled: false
 
 serviceAccount:
   # Specifies whether a service account should be created
