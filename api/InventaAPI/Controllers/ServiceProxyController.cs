@@ -31,5 +31,16 @@ namespace DFDSServiceAPI.Controllers
             var results = _mapper.Map<List<ServiceProxyResultDto>>(await _proxyService.GetResults());
             return Ok(results);
         }
+
+        [HttpGet("stats")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(404)]
+        public async Task<IActionResult> GetAllStats()
+        {
+            var results = _mapper.Map<List<ServiceProxyResultDto>>(await _proxyService.GetResults());
+            var payload = ServiceProxyStatResultDto.FromServiceProxyResult(results);
+
+            return Ok(payload);
+        }
     }
 }
