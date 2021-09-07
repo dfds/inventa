@@ -32,6 +32,18 @@ namespace DFDSServiceAPI.Controllers
             return Ok(results);
         }
 
+        [HttpGet("{k8sNamespace}")]
+        public async Task<IActionResult> Get(string k8sNamespace)
+        {
+            var results = _mapper.Map<List<ServiceProxyResultDto>>(await _proxyService.GetResults());
+            var payload = results.Select(result =>
+            {
+                return result.GetByNamespace(k8sNamespace);
+            });
+
+            return Ok(payload);
+        }
+
         [HttpGet("stats")]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]

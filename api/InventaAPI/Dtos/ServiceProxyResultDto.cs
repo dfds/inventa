@@ -13,6 +13,36 @@ namespace DFDSServiceAPI.Dtos
         public List<Extensionsv1beta1Ingress> ingresses { get; set; }
 
         public List<V1APIService> services { get; set; }
+
+        public ServiceProxyResultDto()
+        {
+            ingresses = new List<Extensionsv1beta1Ingress>();
+            services = new List<V1APIService>();
+        }
+
+        public ServiceProxyResultDto GetByNamespace(string k8sNamespace)
+        {
+            var item = new ServiceProxyResultDto();
+
+            foreach (var ingress in ingresses)
+            {
+                if (ingress.Metadata.Namespace().Equals(k8sNamespace))
+                {
+                    item.ingresses.Add(ingress);
+                }
+            }
+                
+            // Loop through every Service object and group them by namespace
+            foreach (var service in services)
+            {
+                if (service.Metadata.Namespace().Equals(k8sNamespace))
+                {
+                    item.services.Add(service);
+                }
+            }
+            
+            return item;
+        }
     }
 
     public class ServiceProxyStatResultDto
