@@ -1,8 +1,10 @@
-package misc
+package http
 
 import (
 	"context"
 	"fmt"
+	"github.com/dfds/inventa/operator/features/crossplane"
+	"github.com/dfds/inventa/operator/misc"
 	"log"
 	"net/http"
 	"os"
@@ -17,12 +19,12 @@ import (
 	"k8s.io/apimachinery/pkg/util/json"
 )
 
-var LISTEN_ADDRESS = GetEnvValue("INVENTA_OPERATOR_LISTEN_ADDRESS", "127.0.0.1")
-var AUTH_TENANT_ID = GetEnvValue("INVENTA_OPERATOR_AUTH_TENANT_ID", "-1")
-var AUTH_CLIENT_ID = GetEnvValue("INVENTA_OPERATOR_AUTH_CLIENT_ID", "-1")
+var LISTEN_ADDRESS = misc.GetEnvValue("INVENTA_OPERATOR_LISTEN_ADDRESS", "127.0.0.1")
+var AUTH_TENANT_ID = misc.GetEnvValue("INVENTA_OPERATOR_AUTH_TENANT_ID", "-1")
+var AUTH_CLIENT_ID = misc.GetEnvValue("INVENTA_OPERATOR_AUTH_CLIENT_ID", "-1")
 
 
-func InitApi(store *InMemoryStore, enableAuth bool) {
+func InitApi(store *misc.InMemoryStore, enableAuth bool) {
 	var provider *oidc.Provider
 	if enableAuth {
 		newProvider, err := oidc.NewProvider(context.Background(), fmt.Sprintf("https://login.microsoftonline.com/%s/v2.0", AUTH_TENANT_ID))
@@ -58,7 +60,7 @@ func InitApi(store *InMemoryStore, enableAuth bool) {
 
 type App struct {
 	Router *mux.Router
-	Store  *InMemoryStore
+	Store  *misc.InMemoryStore
 }
 
 func (a *App) GetAll(w http.ResponseWriter, r *http.Request) {
@@ -77,13 +79,14 @@ func (a *App) GetAll(w http.ResponseWriter, r *http.Request) {
 type GetAllResponse struct {
 	Ingress []IngressDto
 	Service []ServiceDto
-	CrossplaneResources map[string]interface{}
+	CrossplaneResources map[string]crossplane.KubernetesResourcesResponseData
 }
 
-func StoreToGetAllResponse(store *InMemoryStore) GetAllResponse {
+func StoreToGetAllResponse(store *misc.InMemoryStore) GetAllResponse {
 	payload := GetAllResponse{
 		Ingress: []IngressDto{},
 		Service: []ServiceDto{},
+		CrossplaneResources: make(map[string]crossplane.KubernetesResourcesResponseData),
 	}
 
 	for _, v := range store.Services {
@@ -115,6 +118,12 @@ func StoreToGetAllResponse(store *InMemoryStore) GetAllResponse {
 
 		payload.Ingress = append(payload.Ingress, val)
 	}
+
+	// Move to App struct eventually?
+	cClient := crossplane.NewClient()
+	crds := cClient.GetCustomResourceDefinitions()
+	resources := cClient.GetKubernetesResourcesFromCustomResourceDefinitions(crds)
+	payload.CrossplaneResources = resources.Data
 
 	return payload
 }

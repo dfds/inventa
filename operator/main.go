@@ -19,6 +19,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/dfds/inventa/operator/http"
 	"os"
 
 	"github.com/dfds/inventa/operator/misc"
@@ -95,7 +96,7 @@ func main() {
 		// Start separate Goroutine that runs the API server
 		fmt.Println("HTTP api enabled")
 
-		go misc.InitApi(store, enableApiAuth)
+		go http.InitApi(store, enableApiAuth)
 	}
 
 	if enableServiceProxyAnnotationController {

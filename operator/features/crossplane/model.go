@@ -23,12 +23,14 @@ type kubernetesResourceRequest struct {
 }
 
 type kubernetesResourcesResponse struct {
-	Data map[string] struct {
-		TotalCount int
-		Nodes []struct {
-			Id string
-			Unstructured map[string]interface{}
-		}
+	Data map[string] KubernetesResourcesResponseData
+}
+
+type KubernetesResourcesResponseData struct {
+	TotalCount int
+	Nodes []struct {
+		Id string
+		Unstructured map[string]interface{}
 	}
 }
 
