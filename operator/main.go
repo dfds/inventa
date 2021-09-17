@@ -45,6 +45,7 @@ var (
 	enableServiceProxy = misc.GetEnvBool("INVENTA_OPERATOR_ENABLE_SERVICEPROXY_CONTROLLER", true)
 	enableHttpApi      = misc.GetEnvBool("INVENTA_OPERATOR_ENABLE_HTTP_API", true)
 	enableApiAuth      = misc.GetEnvBool("INVENTA_OPERATOR_API_ENABLE_AUTH", false)
+	enableCrossplaneApi = misc.GetEnvBool("INVENTA_OPERATOR_API_ENABLE_CROSSPLANE", false)
 
 	enableIngressProxyAnnotationController = misc.GetEnvBool("INVENTA_OPERATOR_ENABLE_INGRESSPROXY_ANNOTATION_CONTROLLER", true)
 	enableServiceProxyAnnotationController = misc.GetEnvBool("INVENTA_OPERATOR_ENABLE_SERVICEPROXY_ANNOTATION_CONTROLLER", true)

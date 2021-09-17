@@ -5,6 +5,8 @@ import (
 	"strings"
 )
 
+const SA_TOKEN_PATH = "/var/run/secrets/kubernetes.io/serviceaccount"
+
 func GetEnvValue(key string, def string) string {
 	val := os.Getenv(key)
 	if len(val) == 0 {
@@ -32,3 +34,16 @@ func GetEnvBool(key string, def bool) bool {
 	return def
 }
 
+func GetInClusterK8sToken() (string, error) {
+	_, err := os.Stat(SA_TOKEN_PATH)
+	if err != nil {
+		return "", err
+	}
+
+	dat, err := os.ReadFile(SA_TOKEN_PATH)
+	if err != nil {
+		return "", err
+	}
+
+	return string(dat), nil
+}

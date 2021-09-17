@@ -77,6 +77,7 @@ func (a *App) GetAll(w http.ResponseWriter, r *http.Request) {
 type GetAllResponse struct {
 	Ingress []IngressDto
 	Service []ServiceDto
+	CrossplaneResources map[string]interface{}
 }
 
 func StoreToGetAllResponse(store *InMemoryStore) GetAllResponse {
