@@ -19,6 +19,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/dfds/inventa/operator/http"
 	"os"
 
 	"github.com/dfds/inventa/operator/misc"
@@ -45,6 +46,7 @@ var (
 	enableServiceProxy = misc.GetEnvBool("INVENTA_OPERATOR_ENABLE_SERVICEPROXY_CONTROLLER", true)
 	enableHttpApi      = misc.GetEnvBool("INVENTA_OPERATOR_ENABLE_HTTP_API", true)
 	enableApiAuth      = misc.GetEnvBool("INVENTA_OPERATOR_API_ENABLE_AUTH", false)
+	enableCrossplaneApi = misc.GetEnvBool("INVENTA_OPERATOR_API_ENABLE_CROSSPLANE", false)
 
 	enableIngressProxyAnnotationController = misc.GetEnvBool("INVENTA_OPERATOR_ENABLE_INGRESSPROXY_ANNOTATION_CONTROLLER", true)
 	enableServiceProxyAnnotationController = misc.GetEnvBool("INVENTA_OPERATOR_ENABLE_SERVICEPROXY_ANNOTATION_CONTROLLER", true)
@@ -94,7 +96,7 @@ func main() {
 		// Start separate Goroutine that runs the API server
 		fmt.Println("HTTP api enabled")
 
-		go misc.InitApi(store, enableApiAuth)
+		go http.InitApi(store, enableApiAuth)
 	}
 
 	if enableServiceProxyAnnotationController {
