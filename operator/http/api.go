@@ -24,7 +24,7 @@ var AUTH_TENANT_ID = misc.GetEnvValue("INVENTA_OPERATOR_AUTH_TENANT_ID", "-1")
 var AUTH_CLIENT_ID = misc.GetEnvValue("INVENTA_OPERATOR_AUTH_CLIENT_ID", "-1")
 
 
-func InitApi(store *misc.InMemoryStore, enableAuth bool) {
+func InitApi(store *misc.InMemoryStore, enableAuth bool, enableCrossplaneApi bool) {
 	var provider *oidc.Provider
 	if enableAuth {
 		newProvider, err := oidc.NewProvider(context.Background(), fmt.Sprintf("https://login.microsoftonline.com/%s/v2.0", AUTH_TENANT_ID))
@@ -45,6 +45,7 @@ func InitApi(store *misc.InMemoryStore, enableAuth bool) {
 	app := App{
 		Router: r,
 		Store:  store,
+		enableCrossplaneApi: enableCrossplaneApi,
 	}
 	if enableAuth {
 		r.Handle("/api/get-all", authMiddleware.Middleware(http.HandlerFunc(app.GetAll)))
@@ -61,10 +62,11 @@ func InitApi(store *misc.InMemoryStore, enableAuth bool) {
 type App struct {
 	Router *mux.Router
 	Store  *misc.InMemoryStore
+	enableCrossplaneApi bool
 }
 
 func (a *App) GetAll(w http.ResponseWriter, r *http.Request) {
-	payload, err := json.Marshal(StoreToGetAllResponse(a.Store))
+	payload, err := json.Marshal(StoreToGetAllResponse(a.Store, a.enableCrossplaneApi))
 	if err != nil {
 		log.Println("Unable to serialise InMemoryStore")
 		log.Println(err)
@@ -82,7 +84,7 @@ type GetAllResponse struct {
 	CrossplaneResources map[string]crossplane.KubernetesResourcesResponseData
 }
 
-func StoreToGetAllResponse(store *misc.InMemoryStore) GetAllResponse {
+func StoreToGetAllResponse(store *misc.InMemoryStore, enableCrossplaneApi bool) GetAllResponse {
 	payload := GetAllResponse{
 		Ingress: []IngressDto{},
 		Service: []ServiceDto{},
@@ -120,10 +122,12 @@ func StoreToGetAllResponse(store *misc.InMemoryStore) GetAllResponse {
 	}
 
 	// Move to App struct eventually?
-	cClient := crossplane.NewClient()
-	crds := cClient.GetCustomResourceDefinitions()
-	resources := cClient.GetKubernetesResourcesFromCustomResourceDefinitions(crds)
-	payload.CrossplaneResources = resources.Data
+	if enableCrossplaneApi {
+		cClient := crossplane.NewClient()
+		crds := cClient.GetCustomResourceDefinitions()
+		resources := cClient.GetKubernetesResourcesFromCustomResourceDefinitions(crds)
+		payload.CrossplaneResources = resources.Data
+	}
 
 	return payload
 }

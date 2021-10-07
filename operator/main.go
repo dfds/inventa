@@ -96,7 +96,7 @@ func main() {
 		// Start separate Goroutine that runs the API server
 		fmt.Println("HTTP api enabled")
 
-		go http.InitApi(store, enableApiAuth)
+		go http.InitApi(store, enableApiAuth, enableCrossplaneApi)
 	}
 
 	if enableServiceProxyAnnotationController {
