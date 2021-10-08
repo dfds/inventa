@@ -1,6 +1,4 @@
-﻿using k8s;
-using k8s.Models;
-using Microsoft.Extensions.Options;
+﻿using k8s.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Service.Classes;
@@ -8,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Identity.Client;
 
@@ -47,9 +46,16 @@ namespace Service
                 try
                 {
                     var temp = await _client.GetAsync("/api/get-all").Result.Content.ReadAsStringAsync();
+                    //TODO: Go with one deserialisation/parsing library. It'll do for now.
+                    // Currently the issue is that Extensionsv1beta1Ingress & V1APIService uses IntstrIntOrString which at the moment can't be deserialised by System.Text.Json but only Newtonsoft.Json. Using CrossplaneResources as JToken doesn't work when our API controller uses System.Text.Json rather than Newtonsoft.Json. A custom converter of sorts might do the trick.
+                    // See: https://docs.microsoft.com/en-us/dotnet/standard/serialization/system-text-json-how-to?pivots=dotnet-5-0#deserialization-behavior
                     var json = JObject.Parse(temp);
+                    var jsonDocument = JsonDocument.Parse(temp);
                     var ingress = json["Ingress"];
                     var service = json["Service"];
+                    var crossplaneResources = jsonDocument.RootElement.GetProperty("CrossplaneResources");
+
+                    result.crossplaneResources = crossplaneResources;
 
                     foreach (var x in ingress)
                     {
