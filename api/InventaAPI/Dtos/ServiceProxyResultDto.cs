@@ -1,9 +1,6 @@
 ﻿using k8s.Models;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Service.Classes;
+using System.Text.Json;
 
 namespace DFDSServiceAPI.Dtos
 {
@@ -13,11 +10,15 @@ namespace DFDSServiceAPI.Dtos
         public List<Extensionsv1beta1Ingress> ingresses { get; set; }
 
         public List<V1APIService> services { get; set; }
+        
+        public JsonElement crossplaneResources { get; set; }
+
 
         public ServiceProxyResultDto()
         {
             ingresses = new List<Extensionsv1beta1Ingress>();
             services = new List<V1APIService>();
+            crossplaneResources = new JsonElement();
         }
 
         public ServiceProxyResultDto GetByNamespace(string k8sNamespace)

@@ -38,6 +38,16 @@
         "INVENTA_API_AzureAd__ClientId": "set_value",
         "INVENTA_API_AzureAd__TenantId": "set_value"
       }
+    },
+    "DFDSServiceAPI-clean": {
+      "commandName": "Project",
+      "dotnetRunMessages": "true",
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "applicationUrl": "http://localhost:5000",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
     }
   }
 }
