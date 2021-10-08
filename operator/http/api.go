@@ -3,6 +3,7 @@ package http
 import (
 	"context"
 	"fmt"
+	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/dfds/inventa/operator/features/crossplane"
 	"github.com/dfds/inventa/operator/misc"
 	"log"
@@ -10,7 +11,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/coreos/go-oidc"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	v1Core "k8s.io/api/core/v1"
