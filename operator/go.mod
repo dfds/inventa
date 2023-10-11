@@ -12,7 +12,7 @@ require (
 	github.com/mitchellh/mapstructure v1.4.2
 	github.com/onsi/ginkgo v1.16.4
 	github.com/onsi/gomega v1.15.0
-	golang.org/x/net v0.0.0-20210908191846-a5e095526f91 // indirect
+	golang.org/x/net v0.17.0 // indirect
 	k8s.io/api v0.22.2
 	k8s.io/apimachinery v0.22.2
 	k8s.io/client-go v0.22.2
